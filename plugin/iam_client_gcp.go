@@ -8,11 +8,28 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-gcp-common/gcputil"
 	"github.com/hashicorp/vault/sdk/framework"
+	"github.com/hashicorp/vault/sdk/helper/useragent"
 	"github.com/hashicorp/vault/sdk/logical"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/iam/v1"
 )
+
+func (b *backend) IamClient(req *logical.Request) (*iam.Service, error) {
+	client, err := b.httpClient(req)
+	if err != nil {
+		return nil, err
+	}
+
+	iamClient, err := iam.New(client)
+	if err != nil {
+		return nil, err
+	}
+
+	iamClient.UserAgent = useragent.String()
+
+	return iamClient, nil
+}
 
 func (b *backend) httpClient(req *logical.Request) (*http.Client, error) {
 	ctx := context.Background()
