@@ -2,7 +2,9 @@ package plugin
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/hashicorp/go-gcp-common/gcputil"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 )
@@ -28,6 +30,14 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	if err != nil {
 		return nil, err
 	}
+	gcpCredsRaw, ok := data.GetOk("gcp_credentials")
+	if ok {
+		gcpCreds, err := gcputil.Credentials(gcpCredsRaw.(string))
+		if err != nil {
+			return logical.ErrorResponse(fmt.Sprintf("invalid credentials JSON: %v", err)), nil
+		}
+		config.GcpCredentials = gcpCreds
+	}
 
 	storageEntry, err := logical.StorageEntryJSON("config", config)
 	if err != nil {
@@ -37,7 +47,10 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	if err := req.Storage.Put(ctx, storageEntry); err != nil {
 		return nil, err
 	}
+	b.Logger().Debug("put google service account config")
 
+	config, _ = b.readConfig(ctx, req)
+	b.Logger().Debug("%s, %s", config.GcpCredentials.ClientEmail, config.GcpCredentials.ProjectId)
 	return nil, nil
 }
 

@@ -20,8 +20,8 @@ func pathGSA(b *backend) []*framework.Path {
 			},
 			ExistenceCheck: nil, // existence func
 			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.CreateOperation: nil,
-				logical.UpdateOperation: nil,
+				logical.CreateOperation: b.pathGSACreateOrUpdate,
+				logical.UpdateOperation: b.pathGSACreateOrUpdate,
 				logical.DeleteOperation: nil,
 			},
 		},
@@ -90,6 +90,7 @@ func (b *backend) pathGSACreateOrUpdate(ctx context.Context, req *logical.Reques
 	if googleServiceAccount == nil {
 		return logical.ErrorResponse("Failed to find google service account"), nil
 	}
+	b.Logger().Debug("found google service account")
 
 	return nil, nil
 }
