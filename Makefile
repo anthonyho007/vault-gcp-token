@@ -1,7 +1,7 @@
 BIN_NAME=vault-gcp-token
 VAULT_CONFIG=$(PWD)/plugins.hcl
-TMP_DIR="/private/tmp/vault-plugin"
-PLUGIN_PATH="gcp-token"
+TMP_DIR=/private/tmp/vault-plugin
+PLUGIN_PATH=gcp-token
 
 export GO111MODULE=on
 export VAULT_DEV_ROOT_TOKEN_ID="root"
@@ -15,7 +15,7 @@ server:
 
 install-plugin:
 	mkdir -p $(TMP_DIR)
-	cp $(BIN_NAME) $(TMP_DIR)
+	cp $(BIN_NAME) $(TMP_DIR)/$(BIN_NAME)
 	$(eval SHASUM=$(shell shasum -a 256 "$(TMP_DIR)/$(BIN_NAME)" | cut -d " " -f1))
 	vault write sys/plugins/catalog/$(BIN_NAME) sha_256=$(SHASUM) command=$(BIN_NAME)
 	vault secrets enable --plugin-name=$(BIN_NAME) --path=$(PLUGIN_PATH) plugin

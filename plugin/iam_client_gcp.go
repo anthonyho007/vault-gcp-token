@@ -16,11 +16,12 @@ import (
 )
 
 func (b *backend) IamClient(req *logical.Request) (*iam.Service, error) {
+	b.Logger().Debug("trying to get http client")
 	client, err := b.httpClient(req)
 	if err != nil {
 		return nil, err
 	}
-
+	b.Logger().Debug("get http client")
 	iamClient, err := iam.New(client)
 	if err != nil {
 		return nil, err
@@ -37,7 +38,7 @@ func (b *backend) httpClient(req *logical.Request) (*http.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	b.Logger().Debug("get gcp credentials")
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
 	return oauth2.NewClient(ctx, gcpCreds.TokenSource), nil
 }
@@ -63,7 +64,15 @@ func (c gcpConfig) getMarshalCredentials() ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	return json.Marshal(c.GcpCredentials)
+	return json.Marshal(originalCredentials{
+		GcpCredentials: c.GcpCredentials,
+		Type:           "service_account",
+	})
+}
+
+type originalCredentials struct {
+	*gcputil.GcpCredentials
+	Type string `json: "type"`
 }
 
 func (b *backend) getGcpCredentials(ctx context.Context, req *logical.Request) (*google.Credentials, error) {

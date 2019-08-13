@@ -19,9 +19,12 @@ func Backend() *backend {
 				"config",
 			},
 		},
-		Paths: []*framework.Path{
-			pathConfig(&b),
-		},
+		Paths: framework.PathAppend(
+			[]*framework.Path{
+				pathConfig(&b),
+			},
+			pathGSA(&b),
+		),
 		BackendType: logical.TypeLogical,
 	}
 

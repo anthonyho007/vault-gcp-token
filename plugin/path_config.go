@@ -47,10 +47,8 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	if err := req.Storage.Put(ctx, storageEntry); err != nil {
 		return nil, err
 	}
-	b.Logger().Debug("put google service account config")
+	b.Logger().Debug("put google service account config %s", config.GcpCredentials.ClientEmail)
 
-	config, _ = b.readConfig(ctx, req)
-	b.Logger().Debug("%s, %s", config.GcpCredentials.ClientEmail, config.GcpCredentials.ProjectId)
 	return nil, nil
 }
 
